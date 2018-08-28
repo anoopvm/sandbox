@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: prometheus-rc
+spec:
+  replicas: 1
+  selector:
+    app: prometheus
+  template:
+    metadata:
+      name: prometheus
+      labels:
+        app: prometheus
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        monitoring: telemetry
+      containers:
+      - args:
+        - --config.file=/etc/prometheus/config_out/prometheus.yml
+        name: prometheus
+        image: prom/prometheus
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - mountPath: /etc/prometheus/config_out
+          name: prometheus-volume
+      volumes:
+      - name: prometheus-volume
+        persistentVolumeClaim:
+          claimName: telemetry-pvc
+
